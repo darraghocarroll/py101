@@ -1,0 +1,8 @@
+{
+    "welcome": "Welcome to Loan Calculator!",
+    "invalid_input": "Sorry, that is not a valid input, try again.\n",
+    "get_value": "Please enter the ",
+    "get_choice": "Would you like to do another calculation? (y/n)",
+    "monthly_payment": "Your monthly payment is ",
+    "goodbye": "Thank you for using us, goodbye!"
+}
