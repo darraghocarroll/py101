@@ -4,23 +4,57 @@ import random
 
 POSSIBLE_HANDS = ['rock', 'paper', 'scissors','lizard','spock']
 GAME_LOGIC = {  #dict of winning user hands
-    'rock':     ['lizard', 'scissors'],
-    'paper':    ['rock', 'spock'],
-    'scissors': ['paper', 'lizard'],
-    'lizard':   ['spock', 'paper'],
-    'spock':    ['scissors', 'rock']
+    'rock':     {'lizard': 'ROCK CRUSHES LIZARD!', 
+                 'scissors': 'ROCK CRUSHES SCISSORS!'},
+    'paper':    {'rock': 'PAPER SUFFOCATES ROCK!', 
+                  'spock': 'PAPER DISPROVES SPOCK!'},
+    'scissors': {'paper': 'SCISSORS CUTS PAPER!', 
+                  'lizard': 'SCISSORS DECAPITATES LIZARD!'},
+    'lizard':   {'spock': 'LIZARD POISONS SPOCK!',
+                 'paper': 'LIZARD EATS PAPER!'},
+    'spock':    {'scissors': 'SPOCK CRUSHES SCISSORS',
+                 'rock': 'SPOCK VAPORIZES ROCK!'}
 }
 POSSIBLE_TOURNAMENT_LENGTH = [1,3,5]
 
 def prompt(message):        #identifies computer output
     print(f'==> {message}')
+    
+def display_welcome_message():   #display welcome message
+    print('===============WELCOME TO RPS====================')
+
+def display_separater():         #display separateor
+    print('=============================================================')
+    
+def get_tournament_length():     #How many rounds is this RPS tournament?
+    prompt('How many Hands would you like to play in this tournament? ') 
+    prompt('Choices are 1, 3, or 5 hands. ')
+    return input()
+
+def display_hand_choices(user_hand, computer_hand):         #display hand choices
+    prompt(f'The COMPUTER chose -- {computer_hand.upper()} --')
+    prompt(f'The USER chose -- {user_hand.upper()} --')
+    
+def display_current_round(current_round):                  #display current round
+    prompt(f'This is ROUND #{current_round}')
+    
+def display_score():                                        #display score
+    prompt(f'The Score is USER:{player_score['USER']} COMPUTER:{player_score['COMPUTER']}')
+    
+def get_user_hand():                                        #get user hand choice
+    prompt(f'What hand would you like to play? [{', '.join(POSSIBLE_HANDS)}]')
+    return input().casefold()
+
+def when_a_hand_is_tied(current_round):                   #handling of a tied round
+    prompt(f'That was a TIE, we will have to replay HAND #{current_round}')
+    current_round += 0 #replay of the round
 
 def invalid_tournament_length(user_input): #checks if tournament length is a valid input
     try:
         user_input = int(user_input)
         if user_input not in POSSIBLE_TOURNAMENT_LENGTH:
             return True
-    except TypeError:
+    except (TypeError, ValueError):
         return True
 
     return False
@@ -34,77 +68,96 @@ def invalid_hand_choice(user_input): #error handling if invalid hand
 
     return False
 
-def calculate_hand_winner(user_hand, computer_hand): #RPS game logic
-    if user_hand in GAME_LOGIC[user_hand]:
+def calculate_hand_winner(user_hand, computer_hand): #Calculates hand winner and updates score
+    if computer_hand in GAME_LOGIC[user_hand]:
         player_score['USER'] += 1
+        prompt(GAME_LOGIC[user_hand][computer_hand])
+        prompt('The USER has WON THIS HAND!')
     elif user_hand == computer_hand:
         return 'tie'
     else:
         player_score['COMPUTER'] += 1
-
-player_score = {                 #Create user and score dict
-    'USER' : 0,
-    'COMPUTER' : 0,
-    }
-
-os.system('clear')
-
-while True:
-    print('===============WELCOME TO RPS====================')
-    prompt('How many Hands would you like to play in this tournament? ') # How long is this RPS tournament ?
-    prompt('Choices are 1, 3, or 5 hands. ')
-    tournament_length = input()
-
-    while invalid_tournament_length(tournament_length): #check if tournament length is valid
-        prompt('Sorry, you must chose either 1, 3, or 5 hands. ')
-        tournament_length = input()
-
-
-    current_hand = 1  #setting first hand number
-
-    while current_hand <= int(tournament_length): #while loop to play tournament length
-        print('=============================================================')
-        prompt(f'This is HAND #{current_hand}')
-
-        prompt(f'What hand would you like to play, {', '.join(POSSIBLE_HANDS)}')
-        user_hand = input().casefold()
-        while invalid_hand_choice(user_hand):
-            prompt(f'Sorry, you must chose either {', '.join(POSSIBLE_HANDS)} ')
-            user_hand = input().casefold()
-
-        print('=============================================================')
-        computer_hand = random.choice(POSSIBLE_HANDS)
-        prompt(f'The COMPUTER has chosen {computer_hand}')
-        print('=============================================================')
-
-        result = calculate_hand_winner(user_hand, computer_hand)
-
-        if result == 'tie':
-            prompt(f'That was a TIE, we will have to replay HAND #{current_hand}')
-            current_hand += 0
-        else:
-            current_hand += 1
-
-        print('=============================================================')
-        prompt(f'The Score is {player_score}')
-
+        prompt(GAME_LOGIC[computer_hand][user_hand])
+        prompt('The COMPUTER has WON THIS HAND!')
+        
+def display_tournament_winner():                     #Displays Tournament Winner 
     if player_score['USER'] > player_score['COMPUTER']:
-        print('=============================================================')
+        display_separater()
         prompt('THE USER WINS!!!!!')
     else:
-        print('=============================================================')
+        display_separater()
         prompt('THE COMPUTER WINS!!!!!')
+        
+def play_one_round():                                #one round of RPS-LS
+    global current_round
+    
+    display_current_round(current_round)
+        
+    user_hand = get_user_hand()
+    
+    while invalid_hand_choice(user_hand):
+        prompt(f'Sorry, you must chose either {', '.join(POSSIBLE_HANDS)} ')
+        user_hand = input().casefold()
 
+    os.system('clear')
+        
+    display_separater()
+    computer_hand = random.choice(POSSIBLE_HANDS)
+        
+    display_hand_choices(user_hand, computer_hand)
+        
+    result = calculate_hand_winner(user_hand, computer_hand)
+
+    if result == 'tie':
+        when_a_hand_is_tied(current_round)
+    else:
+        current_round += 1
+
+    display_separater()
+
+    display_score()
+    
+def would_you_like_to_play_again():                  #asking if user wants to play again
     prompt('Would you like to play again? [y/n]' )
     play_again = input().casefold()
 
     while play_again not in ['y', 'n']:
         prompt("Sorry, you must choose 'y' or 'n'")
         play_again = input().casefold()
+    
+    return play_again
+
+
+os.system('clear')
+
+while True:                         #MAIN LOOP
+    display_welcome_message()
+    
+    player_score = {            #Create or reset both scores to 0 
+    'USER' : 0,
+    'COMPUTER' : 0,
+    }
+    
+    tournament_length = get_tournament_length()  #get tournament length
+
+    while invalid_tournament_length(tournament_length): #is tournament length invalid?
+        prompt('Sorry, you must chose either 1, 3, or 5 hands. ')
+        tournament_length = input()
+
+    tournament_length = int(tournament_length)  #change string input to integer
+    
+    current_round = 1  #setting first round number
+
+    while current_round <= tournament_length:  #play user-selected amount of rounds
+
+       play_one_round()
+    
+    display_tournament_winner()              #displays winner
+    
+    play_again = would_you_like_to_play_again()     #obtains and validates user-input
 
     if play_again == 'y':
-        player_score['USER'] = 0
-        player_score['COMPUTER'] = 0
         os.system('clear')
     else:
+        prompt('GOODBYE!')
         break

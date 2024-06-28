@@ -1,10 +1,6 @@
-# debug.py
 
-import pdb
+lst = [1,2,3,4,5]
 
-counter = 1
+lst.pop(2)
 
-while counter <= 5:
-    print(counter)
-    pdb.set_trace()  # Add breakpoint
-    counter += 1
+print(lst)
